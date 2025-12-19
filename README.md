@@ -2,7 +2,8 @@
 
 一个优雅的 Web 界面，为 BaiduPCS-Go 命令行工具提供现代化的图形界面操作体验。
 
-![BaiduPCS-Go Web Manager]([screenshot.png](https://raw.githubusercontent.com/yuxuanb5-commits/baidupcs-web/refs/heads/main/baidupcsweb.png))
+![BaiduPCS-Go Web Manager]<img width="1919" height="1078" alt="baidupcsweb" src="https://github.com/user-attachments/assets/48487785-925c-48b4-bfd0-ef4e9f342c66" />
+
 
 ## ✨ 特性
 
