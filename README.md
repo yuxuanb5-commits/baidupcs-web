@@ -2,7 +2,7 @@
 
 一个优雅的 Web 界面，为 BaiduPCS-Go 命令行工具提供现代化的图形界面操作体验。
 
-![BaiduPCS-Go Web Manager](screenshot.png)
+![BaiduPCS-Go Web Manager]([screenshot.png](https://raw.githubusercontent.com/yuxuanb5-commits/baidupcs-web/refs/heads/main/baidupcsweb.png))
 
 ## ✨ 特性
 
