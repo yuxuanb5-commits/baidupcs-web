@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BaiduPCS-Go Web 管理器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: #4a6ee0;
+        }
+        
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .logo-text p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .user-info {
+            text-align: right;
+        }
+        
+        .user-info .username {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .user-info .status {
+            font-size: 0.9rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+        
+        .sidebar-section h3 {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f5f7fa;
+        }
+        
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: #4a6ee0;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .quota-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .quota-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .quota-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .quota-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a6ee0, #2196F3);
+            transition: width 0.5s;
+        }
+        
+        .main-panel {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .panel-header {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .current-path {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            font-size: 0.9rem;
+        }
+        
+        .path-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .file-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .file-table thead {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+        }
+        
+        .file-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .file-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .file-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .file-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-icon {
+            color: #4a6ee0;
+            width: 20px;
+        }
+        
+        .file-type {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .file-type.folder {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .file-type.file {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 4px;
+            background: #f8f9fa;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .action-btn.download {
+            color: #28a745;
+        }
+        
+        .action-btn.delete {
+            color: #dc3545;
+        }
+        
+        .empty-state {
+            padding: 50px 20px;
+            text-align: center;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #adb5bd;
+        }
+        
+        .loading {
+            padding: 40px;
+            text-align: center;
+            color: #6c757d;
+        }
+        
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #4a6ee0;
+        }
+        
+        .logs-panel {
+            margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .logs-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logs-content {
+            padding: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 3px 0;
+        }
+        
+        .log-info {
+            color: #28a745;
+        }
+        
+        .log-error {
+            color: #dc3545;
+        }
+        
+        .log-warning {
+            color: #ffc107;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .modal-header {
+            padding: 20px;
+            background: #4a6ee0;
+            color: white;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4a6ee0;
+            box-shadow: 0 0 0 2px rgba(74,110,224,0.2);
+        }
+        
+        .download-progress {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #4a6ee0;
+            transition: width 0.3s;
+        }
+        
+        .login-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .login-form {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .login-form input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+        
+        .help-text {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .breadcrumb-separator {
+            color: #6c757d;
+            margin: 0 5px;
+        }
+        
+        .breadcrumb-link {
+            color: #4a6ee0;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .breadcrumb-link:hover {
+            background: #e8f0fe;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 登录面板（初始显示） -->
+        <div id="loginPanel" class="login-panel">
+            <h3>登录百度网盘</h3>
+            <div class="login-form">
+                <input type="text" id="bdussInput" placeholder="输入BDUSS" value="">
+                <button id="loginBtn" class="btn btn-primary">登录</button>
+            </div>
+            <p class="help-text">获取BDUSS：登录百度网盘网页版 → F12开发者工具 → Application → Cookies → 复制BDUSS值</p>
+        </div>
+        
+        <!-- 主界面（登录后显示） -->
+        <div id="mainInterface" style="display: none;">
+            <header>
+                <div class="logo">
+                    <i class="fas fa-cloud"></i>
+                    <div class="logo-text">
+                        <h1>BaiduPCS-Go 文件管理器</h1>
+                        <p>基于Web的百度网盘管理工具</p>
+                    </div>
+                </div>
+                <div class="user-info">
+                    <div class="username" id="username">未登录</div>
+                    <div class="status disconnected" id="connectionStatus">未连接</div>
+                </div>
+            </header>
+            
+            <div class="main-content">
+                <!-- 侧边栏 -->
+                <div class="sidebar">
+                    <div class="sidebar-section">
+                        <h3>文件操作</h3>
+                        <button id="refreshBtn" class="btn btn-primary">
+                            <i class="fas fa-sync-alt"></i> 刷新列表
+                        </button>
+                        <button id="parentBtn" class="btn btn-info">
+                            <i class="fas fa-level-up-alt"></i> 上级目录
+                        </button>
+                        <button id="mkdirBtn" class="btn btn-success">
+                            <i class="fas fa-folder-plus"></i> 新建文件夹
+                        </button>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3>系统操作</h3>
+                        <button id="getQuotaBtn" class="btn btn-warning">
+                            <i class="fas fa-chart-pie"></i> 容量信息
+                        </button>
+                        <button id="whoBtn" class="btn btn-info">
+                            <i class="fas fa-user"></i> 用户信息
+                        </button>
+                        <button id="disconnectBtn" class="btn btn-danger">
+                            <i class="fas fa-sign-out-alt"></i> 断开连接
+                        </button>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3>网盘容量</h3>
+                        <div id="quotaDisplay" class="quota-display">
+                            <div class="quota-info">
+                                <span>已用空间</span>
+                                <span id="usedSpace">-</span>
+                            </div>
+                            <div class="quota-info">
+                                <span>总空间</span>
+                                <span id="totalSpace">-</span>
+                            </div>
+                            <div class="quota-bar">
+                                <div id="quotaBar" class="quota-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3>下载目录</h3>
+                        <p style="font-size: 0.9rem; color: #6c757d;">
+                            文件将下载到：<br>
+                            <code id="downloadPath">~/Downloads/baidupcs-web/</code>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- 主面板 -->
+                <div class="main-panel">
+                    <div class="panel-header">
+                        <div class="current-path" id="currentPath">/</div>
+                        <div class="path-actions">
+                            <button id="homeBtn" class="btn btn-primary" style="padding: 8px 12px;">
+                                <i class="fas fa-home"></i> 根目录
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 面包屑导航 -->
+                    <div class="breadcrumb" id="breadcrumb">
+                        <div class="breadcrumb-item">
+                            <a class="breadcrumb-link" onclick="changePath('/')">根目录</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 文件表格 -->
+                    <div style="overflow-x: auto;">
+                        <table class="file-table">
+                            <thead>
+                                <tr>
+                                    <th>名称</th>
+                                    <th>类型</th>
+                                    <th>大小</th>
+                                    <th>修改时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fileTableBody">
+                                <tr>
+                                    <td colspan="5" class="loading">
+                                        <i class="fas fa-spinner fa-spin"></i>
+                                        <p>正在连接...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 日志面板 -->
+            <div class="logs-panel">
+                <div class="logs-header">
+                    <h3>操作日志</h3>
+                    <button id="clearLogsBtn" class="btn" style="padding: 5px 10px; font-size: 0.9rem;">
+                        清空日志
+                    </button>
+                </div>
+                <div class="logs-content" id="logContainer">
+                    <div class="log-entry log-info">欢迎使用 BaiduPCS-Go 文件管理器</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 新建文件夹模态框 -->
+    <div id="mkdirModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">新建文件夹</div>
+                <button class="modal-close" onclick="closeModal('mkdirModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="folderName">文件夹名称</label>
+                    <input type="text" id="folderName" class="form-control" placeholder="请输入文件夹名称">
+                </div>
+                <button id="createFolderBtn" class="btn btn-success" style="width: 100%;">
+                    <i class="fas fa-plus-circle"></i> 创建文件夹
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 下载进度模态框 -->
+    <div id="downloadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">下载文件</div>
+                <button class="modal-close" onclick="closeModal('downloadModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="downloadInfo">
+                    <p>正在下载: <span id="downloadFileName">-</span></p>
+                </div>
+                <div id="downloadProgress" class="download-progress" style="display: none;">
+                    <div class="progress-info">
+                        <span>进度</span>
+                        <span id="downloadPercent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="downloadBar" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-info" style="margin-top: 10px;">
+                        <span>速度</span>
+                        <span id="downloadSpeed">-</span>
+                    </div>
+                    <div class="progress-info">
+                        <span>已下载</span>
+                        <span id="downloadCurrent">-</span>
+                    </div>
+                </div>
+                <div id="downloadComplete" style="display: none; text-align: center; padding: 20px 0;">
+                    <i class="fas fa-check-circle" style="font-size: 3rem; color: #28a745; margin-bottom: 10px;"></i>
+                    <p>下载完成！</p>
+                    <p id="downloadLocation" style="font-size: 0.9rem; color: #6c757d;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let ws = null;
+        let currentPath = '/';
+        let isConnected = false;
+        let requestId = 0;
+        let bduss = '';
+        let lastProgressTime = 0;
+        let smoothProgress = 0;
+        let progressUpdateInterval = null;
+
+        
+        // DOM元素
+        const loginPanel = document.getElementById('loginPanel');
+        const mainInterface = document.getElementById('mainInterface');
+        const bdussInput = document.getElementById('bdussInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const parentBtn = document.getElementById('parentBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const mkdirBtn = document.getElementById('mkdirBtn');
+        const getQuotaBtn = document.getElementById('getQuotaBtn');
+        const whoBtn = document.getElementById('whoBtn');
+        const createFolderBtn = document.getElementById('createFolderBtn');
+        const clearLogsBtn = document.getElementById('clearLogsBtn');
+        const folderNameInput = document.getElementById('folderName');
+        const fileTableBody = document.getElementById('fileTableBody');
+        const breadcrumb = document.getElementById('breadcrumb');
+        const currentPathElement = document.getElementById('currentPath');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const usernameElement = document.getElementById('username');
+        const usedSpaceElement = document.getElementById('usedSpace');
+        const totalSpaceElement = document.getElementById('totalSpace');
+        const quotaBar = document.getElementById('quotaBar');
+        const downloadPathElement = document.getElementById('downloadPath');
+        const logContainer = document.getElementById('logContainer');
+        
+        // 下载相关元素
+        const downloadFileName = document.getElementById('downloadFileName');
+        const downloadProgress = document.getElementById('downloadProgress');
+        const downloadPercent = document.getElementById('downloadPercent');
+        const downloadBar = document.getElementById('downloadBar');
+        const downloadSpeed = document.getElementById('downloadSpeed');
+        const downloadCurrent = document.getElementById('downloadCurrent');
+        const downloadComplete = document.getElementById('downloadComplete');
+        const downloadLocation = document.getElementById('downloadLocation');
+        
+        // 初始化
+        function init() {
+            // 加载保存的BDUSS
+            const savedBduss = localStorage.getItem('baidupcs_bduss');
+            if (savedBduss) {
+                bdussInput.value = savedBduss;
+                bduss = savedBduss;
+            }
+            
+            // 绑定事件
+            bindEvents();
+            
+            addLog('系统初始化完成', 'info');
+        }
+        
+        // 绑定事件
+        function bindEvents() {
+            loginBtn.addEventListener('click', handleLogin);
+            disconnectBtn.addEventListener('click', disconnectFromServer);
+            refreshBtn.addEventListener('click', () => fetchFileList(currentPath));
+            parentBtn.addEventListener('click', goToParent);
+            homeBtn.addEventListener('click', () => changePath('/'));
+            mkdirBtn.addEventListener('click', () => openModal('mkdirModal'));
+            getQuotaBtn.addEventListener('click', getQuotaInfo);
+            whoBtn.addEventListener('click', getUserInfo);
+            createFolderBtn.addEventListener('click', createFolder);
+            clearLogsBtn.addEventListener('click', clearLogs);
+            
+            // 回车键登录
+            bdussInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+            
+            // 回车键创建文件夹
+            folderNameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') createFolder();
+            });
+        }
+        
+        // 登录处理
+        function handleLogin() {
+            bduss = bdussInput.value.trim();
+            if (!bduss) {
+                alert('请输入BDUSS');
+                return;
+            }
+            
+            // 保存BDUSS
+            localStorage.setItem('baidupcs_bduss', bduss);
+            
+            addLog('正在登录...', 'info');
+            
+            // 显示主界面
+            loginPanel.style.display = 'none';
+            mainInterface.style.display = 'block';
+            
+            // 连接WebSocket
+            connectToServer();
+        }
+        
+        // 连接服务器
+        function connectToServer() {
+            const wsUrl = 'ws://' + window.location.hostname + ':3000';
+            
+            addLog(`正在连接到 ${wsUrl}...`, 'info');
+            
+            try {
+                ws = new WebSocket(wsUrl);
+                
+                ws.onopen = () => {
+                    addLog('WebSocket连接已建立', 'info');
+                    updateConnectionStatus(true);
+                    
+                    // 发送登录命令
+                    sendCommand('login', { bduss: bduss });
+                    
+                    // 获取用户信息
+                    setTimeout(() => {
+                        getUserInfo();
+                        fetchFileList('/');
+                    }, 1000);
+                };
+                
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleServerMessage(data);
+                    } catch (error) {
+                        console.error('解析服务器消息失败:', error);
+                    }
+                };
+                
+                ws.onerror = (error) => {
+                    addLog(`连接错误: ${error.message || '未知错误'}`, 'error');
+                    updateConnectionStatus(false);
+                };
+                
+                ws.onclose = () => {
+                    addLog('连接已关闭', 'info');
+                    updateConnectionStatus(false);
+                };
+                
+            } catch (error) {
+                addLog(`连接失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 断开连接
+        function disconnectFromServer() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+            updateConnectionStatus(false);
+            fileTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>已断开连接</p>
+                    </td>
+                </tr>
+            `;
+            
+            // 返回登录界面
+            mainInterface.style.display = 'none';
+            loginPanel.style.display = 'block';
+        }
+        
+        // 更新连接状态
+        function updateConnectionStatus(connected) {
+            isConnected = connected;
+            const statusElement = document.getElementById('connectionStatus');
+            
+            if (connected) {
+                statusElement.textContent = '已连接';
+                statusElement.className = 'status connected';
+            } else {
+                statusElement.textContent = '未连接';
+                statusElement.className = 'status disconnected';
+            }
+        }
+        
+        // 发送命令
+        function sendCommand(command, args = {}) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                addLog('错误：未连接到服务器', 'error');
+                return null;
+            }
+            
+            const id = ++requestId;
+            const data = {
+                command,
+                args,
+                requestId: id
+            };
+            
+            ws.send(JSON.stringify(data));
+            addLog(`发送命令: ${command}`, 'info');
+            return id;
+        }
+        
+        // 处理服务器消息
+        function handleServerMessage(data) {
+            const { type, message, requestId, ...rest } = data;
+            
+            switch(type) {
+                case 'login_success':
+                    addLog(message, 'info');
+                    break;
+                    
+                case 'file_list':
+                    renderFileList(rest.data, rest.path);
+                    addLog(`加载 ${rest.data.length} 个文件/文件夹`, 'info');
+                    break;
+                    
+                case 'download_progress':
+                    updateDownloadProgress(rest.progress, rest.current, rest.total, rest.speed);
+                    break;
+                    
+                case 'download_complete':
+                    addLog(`下载完成: ${rest.localPath}`, 'info');
+                    showDownloadComplete(rest.localPath);
+                    break;
+                    
+                case 'mkdir_success':
+                    addLog(message, 'info');
+                    closeModal('mkdirModal');
+                    folderNameInput.value = '';
+                    fetchFileList(currentPath);
+                    break;
+                    
+                case 'delete_success':
+                    addLog(message, 'info');
+                    fetchFileList(currentPath);
+                    break;
+                    
+                case 'quota_info':
+                    updateQuotaInfo(rest.data);
+                    break;
+                    
+                case 'who_info':
+                    updateUserInfo(rest.data);
+                    break;
+                    
+                case 'error':
+                    addLog(`错误: ${message}`, 'error');
+                    break;
+                    
+                        case 'download_start':
+        // 重置进度
+        smoothProgress = 0;
+        lastProgressTime = 0;
+        downloadProgress.style.display = 'block';
+        downloadComplete.style.display = 'none';
+        downloadBar.style.width = '0%';
+        downloadPercent.textContent = '0%';
+        downloadSpeed.textContent = '-';
+        downloadCurrent.textContent = '-';
+        break;
+        
+    case 'download_progress':
+        updateDownloadProgress(rest.progress, rest.current, rest.total, rest.speed, rest.remaining);
+        break;
+                    
+                default:
+                    console.log('未处理的消息类型:', type, data);
+            }
+        }
+        
+        // 获取文件列表
+        function fetchFileList(path) {
+            if (!isConnected) {
+                addLog('错误：未连接到服务', 'error');
+                return;
+            }
+            
+            addLog(`获取路径: ${path}`, 'info');
+            currentPath = path;
+            currentPathElement.textContent = path;
+            updateBreadcrumb();
+            
+            // 显示加载状态
+            fileTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>正在加载文件列表...</p>
+                    </td>
+                </tr>
+            `;
+            
+            sendCommand('ls', { path });
+        }
+        
+        // 渲染文件列表
+        function renderFileList(files, path) {
+            if (!files || files.length === 0) {
+                fileTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <p>此文件夹为空</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            files.forEach(file => {
+                const isDir = file.is_dir || file.isDir;
+                const icon = isDir ? 'fa-folder' : 'fa-file';
+                const typeClass = isDir ? 'folder' : 'file';
+                const typeText = isDir ? '文件夹' : '文件';
+                
+                html += `
+                <tr>
+                    <td>
+                        <div class="file-name">
+                            <i class="fas ${icon} file-icon"></i>
+                            <span>${escapeHtml(file.name)}</span>
+                        </div>
+                    </td>
+                    <td><span class="file-type ${typeClass}">${typeText}</span></td>
+                    <td>${escapeHtml(file.size_str || '-')}</td>
+                    <td>${escapeHtml(file.modified_time || '-')}</td>
+                    <td>
+                        <div class="file-actions">
+                            ${isDir ? 
+                                `<button class="action-btn" onclick="openFolder('${escapeSingleQuote(file.name)}')" title="打开文件夹">
+                                    <i class="fas fa-folder-open"></i>
+                                </button>` : 
+                                `<button class="action-btn download" onclick="downloadFile('${escapeSingleQuote(file.name)}')" title="下载文件">
+                                    <i class="fas fa-download"></i>
+                                </button>`
+                            }
+                            <button class="action-btn delete" onclick="deleteItem('${escapeSingleQuote(file.name)}', ${isDir})" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            });
+            
+            fileTableBody.innerHTML = html;
+        }
+        
+        // 打开文件夹
+        function openFolder(folderName) {
+            const newPath = currentPath === '/' ? `/${folderName}` : `${currentPath}/${folderName}`;
+            fetchFileList(newPath);
+        }
+        
+        // 返回上级目录
+        function goToParent() {
+            if (currentPath === '/') return;
+            
+            const pathParts = currentPath.split('/').filter(p => p);
+            pathParts.pop();
+            const newPath = pathParts.length > 0 ? '/' + pathParts.join('/') : '/';
+            fetchFileList(newPath);
+        }
+        
+        // 切换路径
+        function changePath(path) {
+            fetchFileList(path);
+        }
+        
+        // 更新面包屑导航
+        function updateBreadcrumb() {
+            const parts = currentPath.split('/').filter(p => p);
+            let html = `
+                <div class="breadcrumb-item">
+                    <a class="breadcrumb-link" onclick="changePath('/')">根目录</a>
+                </div>
+            `;
+            
+            let current = '';
+            parts.forEach(part => {
+                current += '/' + part;
+                html += `
+                    <div class="breadcrumb-separator">/</div>
+                    <div class="breadcrumb-item">
+                        <a class="breadcrumb-link" onclick="changePath('${current}')">${part}</a>
+                    </div>
+                `;
+            });
+            
+            breadcrumb.innerHTML = html;
+        }
+        
+        // 下载文件
+        function downloadFile(fileName) {
+            if (!isConnected) {
+                addLog('错误：未连接到服务', 'error');
+                return;
+            }
+            
+            const filePath = currentPath === '/' ? `/${fileName}` : `${currentPath}/${fileName}`;
+            
+            // 显示下载模态框
+            downloadFileName.textContent = fileName;
+            downloadProgress.style.display = 'block';
+            downloadComplete.style.display = 'none';
+            downloadBar.style.width = '0%';
+            downloadPercent.textContent = '0%';
+            downloadSpeed.textContent = '-';
+            downloadCurrent.textContent = '-';
+            
+            openModal('downloadModal');
+            
+            addLog(`开始下载: ${filePath}`, 'info');
+            sendCommand('download', { path: filePath, filename: fileName });
+        }
+        
+// 更新下载进度 - 改进版
+function updateDownloadProgress(percent, current, total, speed, remaining) {
+    // 防抖：避免频繁更新
+    const now = Date.now();
+    if (now - lastProgressTime < 200) { // 200ms更新一次
+        return;
+    }
+    lastProgressTime = now;
+    
+    // 平滑进度
+    if (percent > smoothProgress) {
+        smoothProgress = percent;
+    }
+    
+    // 更新UI
+    downloadBar.style.width = smoothProgress + '%';
+    downloadPercent.textContent = smoothProgress + '%';
+    
+    if (current && total) {
+        downloadFileName.textContent = downloadFileName.textContent.split(' (')[0] + ` (${current}/${total})`;
+    }
+    
+    if (speed) {
+        downloadSpeed.textContent = speed;
+    }
+    
+    if (remaining) {
+        // 可选：显示剩余时间
+    }
+}
+        
+        // 显示下载完成
+        function showDownloadComplete(localPath) {
+            downloadProgress.style.display = 'none';
+            downloadComplete.style.display = 'block';
+            downloadLocation.textContent = `文件保存到: ${localPath}`;
+        }
+        
+        // 删除文件/文件夹
+        function deleteItem(name, isDir) {
+            if (!confirm(`确定要删除${isDir ? '文件夹' : '文件'} "${name}" 吗？`)) {
+                return;
+            }
+            
+            const path = currentPath === '/' ? `/${name}` : `${currentPath}/${name}`;
+            addLog(`正在删除: ${path}`, 'info');
+            sendCommand('rm', { path: path });
+        }
+        
+        // 获取容量信息
+        function getQuotaInfo() {
+            if (!isConnected) {
+                addLog('错误：未连接到服务', 'error');
+                return;
+            }
+            
+            addLog('正在获取容量信息...', 'info');
+            sendCommand('quota', {});
+        }
+        
+        // 更新容量信息
+        function updateQuotaInfo(data) {
+            if (data.used && data.total && data.percent) {
+                usedSpaceElement.textContent = data.used;
+                totalSpaceElement.textContent = data.total;
+                quotaBar.style.width = data.percent + '%';
+                quotaBar.textContent = data.percent + '%';
+                
+                addLog(`容量: ${data.used} / ${data.total} (${data.percent}%)`, 'info');
+            }
+        }
+        
+        // 获取用户信息
+        function getUserInfo() {
+            if (!isConnected) {
+                addLog('错误：未连接到服务', 'error');
+                return;
+            }
+            
+            addLog('正在获取用户信息...', 'info');
+            sendCommand('who', {});
+        }
+        
+        // 更新用户信息
+        function updateUserInfo(data) {
+            if (data.username) {
+                usernameElement.textContent = data.username;
+            }
+            if (data.uid) {
+                usernameElement.textContent += ` (UID: ${data.uid})`;
+            }
+        }
+        
+        // 创建文件夹
+        function createFolder() {
+            const folderName = folderNameInput.value.trim();
+            if (!folderName) {
+                alert('请输入文件夹名称');
+                return;
+            }
+            
+            const folderPath = currentPath === '/' ? `/${folderName}` : `${currentPath}/${folderName}`;
+            addLog(`创建文件夹: ${folderPath}`, 'info');
+            
+            sendCommand('mkdir', { path: folderPath });
+        }
+        
+        // 添加日志
+        function addLog(message, type = 'info') {
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // 清空日志
+        function clearLogs() {
+            logContainer.innerHTML = '';
+            addLog('日志已清空', 'info');
+        }
+        
+        // 工具函数
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function escapeSingleQuote(text) {
+            return text.replace(/'/g, "\\'");
+        }
+        
+        // 初始化应用
+        init();
+    </script>
+</body>
+</html>
