@@ -30,16 +30,16 @@
 
 ### 安装步骤
 bash
-1. 克隆项目
-git clone https://github.com/yourusername/baidupcs-web.git
-cd baidupcs-web
-2. 安装依赖
-npm install
-3. 配置 BaiduPCS-Go 路径
+1. 下载该项目zip并解压
+https://github.com/yuxuanb5-commits/baidupcs-web
+（点击绿色的code按钮，其中的zip选项点击下载）解压缩到任意你喜欢的位置
+3. 安装依赖
+npm install（安装到你的项目文件位置）
+4. 配置 BaiduPCS-Go 路径
 编辑 node_backend.js，修改 PCS_PATH 为您的 baidupcs-go 路径
-4. 启动服务
+5. 启动服务
 node node_backend.js
-5. 打开浏览器访问
+6. 打开浏览器访问
 http://localhost:3000
 ### 获取 BDUSS
 1. 登录百度网盘网页版
